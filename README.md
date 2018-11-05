@@ -24,7 +24,7 @@ lib = tf.load_op_library(lib_path)
 dim = 5
 all_embs = rng.rand(10, dim).astype(np.float32)
 target_embs = rng.rand(2, dim).astype(np.float32)
-sample_ids = sampling.approximate_top_k(
+sample_ids = lib.approximate_top_k(
     all_embs, 
     target_embs,
     num_negative_samples=10, 
