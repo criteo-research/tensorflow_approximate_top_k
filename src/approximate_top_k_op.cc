@@ -7,10 +7,9 @@ using namespace tensorflow;
 class ApproximateTopKOp : public OpKernel {
 public:
     explicit ApproximateTopKOp(OpKernelConstruction* context) : OpKernel(context) {
-        OP_REQUIRES_OK(context, context->GetAttr("num_negative_samples", &num_negative_samples));
-        OP_REQUIRES_OK(context, context->GetAttr("num_trees", &num_trees));
-        OP_REQUIRES_OK(context, context->GetAttr("num_dims", &num_dims));
+        OP_REQUIRES_OK(context, context->GetAttr("k", &k));
         OP_REQUIRES_OK(context, context->GetAttr("num_iters_per_update", &num_iters_per_update));
+        OP_REQUIRES_OK(context, context->GetAttr("num_trees", &num_trees));
         OP_REQUIRES_OK(context, context->GetAttr("seed", &seed));
         OP_REQUIRES_OK(context, context->GetAttr("metric", &metric));
     }
@@ -32,6 +31,7 @@ public:
         OP_REQUIRES(context, all_embeddings.dim_size(1) == target_embeddings.dim_size(1),
                     errors::InvalidArgument("Both inputs should have the same size of the second dimension"));
 
+        const int num_dims = target_embeddings.dim_size(1);
         const int64 num_items = all_embeddings.dim_size(0);
         auto vec = static_cast<double*> (malloc( num_dims * sizeof(double) ));
 
@@ -67,7 +67,7 @@ public:
         Tensor* neighbor_indices = nullptr;
         TensorShape shape = TensorShape();
         shape.AddDim(target_embeddings.dim_size(0));
-        shape.AddDim(num_negative_samples);
+        shape.AddDim(k);
 
         OP_REQUIRES_OK(context, context->allocate_output(0, shape, &neighbor_indices));
         auto output_flat = neighbor_indices->flat<int32>();
@@ -79,10 +79,10 @@ public:
                 vec[z] = double(target(i*num_dims+z));
             }
 
-            t->get_nns_by_vector(vec, num_negative_samples, -1, &toplist, nullptr);
+            t->get_nns_by_vector(vec, k, -1, &toplist, nullptr);
 
-            for(int z=0; z<num_negative_samples; z++){
-                output_flat(i*num_negative_samples+z) = toplist[z];
+            for(int z=0; z<k; z++){
+                output_flat(i*k+z) = toplist[z];
             }
 
             toplist.clear();
@@ -92,10 +92,9 @@ public:
 
 private:
     static const int expected_num_dims = 2;
-    int num_trees;
-    int num_negative_samples;
-    int num_dims;
+    int k;
     int num_iters_per_update;
+    int num_trees;
     int iters_counter = 0;
     string metric;
     int seed;
