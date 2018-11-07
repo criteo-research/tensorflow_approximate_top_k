@@ -33,7 +33,7 @@ public:
                     errors::InvalidArgument("Both inputs should have the same size of the second dimension"));
 
         const int64 num_items = all_embeddings.dim_size(0);
-        auto vec = (double *) malloc( num_dims * sizeof(double) );
+        auto vec = static_cast<double*> (malloc( num_dims * sizeof(double) ));
 
         if (iters_counter % num_iters_per_update == 0) {
             // Indexing
@@ -53,7 +53,7 @@ public:
             t->set_seed(seed);
             for(int i=0; i<num_items; ++i){
                 for(int z=0; z<num_dims; ++z){
-                    vec[z] = (double)all(i*num_dims+z);
+                    vec[z] = double(all(i*num_dims+z));
                 }
 
                 t->add_item(i, vec);
@@ -76,10 +76,10 @@ public:
 
         for(int i=0; i<num_target_items; ++i){
             for(int z=0; z<num_dims; ++z){
-                vec[z] = (double)target(i*num_dims+z);
+                vec[z] = double(target(i*num_dims+z));
             }
 
-            t->get_nns_by_vector(vec, (size_t) num_negative_samples, (size_t) -1, &toplist, nullptr);
+            t->get_nns_by_vector(vec, num_negative_samples, -1, &toplist, nullptr);
 
             for(int z=0; z<num_negative_samples; z++){
                 output_flat(i*num_negative_samples+z) = toplist[z];
@@ -91,7 +91,7 @@ public:
     }
 
 private:
-    const int expected_num_dims = 2;
+    static const int expected_num_dims = 2;
     int num_trees;
     int num_negative_samples;
     int num_dims;
