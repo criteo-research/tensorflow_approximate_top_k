@@ -4,7 +4,7 @@ The operation allows to use approximate nearest neighbors search to do faster to
 Installation
 ------------
 ```bash
-$ git clone https://github.com/Ivanopolo/tensorflow_approximate_top_k
+$ git clone https://github.com/criteo-research/tensorflow_approximate_top_k
 $ cd tensorflow_approximate_top_k
 $ cmake .
 $ make
