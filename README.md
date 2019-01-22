@@ -12,7 +12,7 @@ $ make
 
 Example
 ------------
-This will index `all_embs` 2-D Tensor and will query it with `target_embs` retrieving 10 (`=num_negative_samples`) closest embeddings. With parameters `num_trees` and `num_iters_per_update` we can control the quality of our approximation vs running time.
+This will index `all_embs` 2-D Tensor and will query it with `target_embs` retrieving 10 (`=k`) closest embeddings. With parameters `num_trees` and `num_iters_per_update` we can control the quality of our approximation vs running time.
 ```python
 import tensorflow as tf
 import numpy as np
@@ -27,7 +27,7 @@ target_embs = rng.rand(2, dim).astype(np.float32)
 sample_ids = lib.approximate_top_k(
     all_embs, 
     target_embs,
-    num_negative_samples=10, 
+    k=10, 
     num_trees=16,
     num_dims=dim,
     num_iters_per_update=100, 
