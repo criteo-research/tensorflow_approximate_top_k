@@ -29,7 +29,6 @@ sample_ids = lib.approximate_top_k(
     target_embs,
     k=10, 
     num_trees=16,
-    num_dims=dim,
     num_iters_per_update=100, 
     metric="cosine")
 ```
